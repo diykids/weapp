@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/index/main",
+    "pages/publish/main",
+    "pages/detail/main",
+    "pages/about/main"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#FAFAFA",
+    "navigationBarTitleText": "书妍书玥",
+    "navigationBarTextStyle": "black",
+    "backgroundTextStyle": "dark",
+    "backgroundColor": "#f9f9f9"
+  },
+  "tabBar": {
+    "color": "#707070",
+    "selectedColor": "#118CE2",
+    "borderStyle": "#dddee1",
+    "list": [
+      {
+        "selectedIconPath": "static/images/home_active.png",
+        "iconPath": "static/images/home.png",
+        "pagePath": "pages/index/main",
+        "text": "首页"
+      },
+      {
+        "selectedIconPath": "static/images/photo_active.png",
+        "iconPath": "static/images/photo.png",
+        "pagePath": "pages/publish/main",
+        "text": "发布"
+      },
+      {
+        "selectedIconPath": "static/images/about_active.png",
+        "iconPath": "static/images/about.png",
+        "pagePath": "pages/about/main",
+        "text": "我"
+      }
+    ]
+  }
+}

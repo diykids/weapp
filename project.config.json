@@ -1,16 +1,18 @@
 {
 	"description": "项目配置文件。",
 	"setting": {
-		"urlCheck": true,
+		"urlCheck": false,
 		"es6": false,
 		"postcss": true,
 		"minified": true,
-		"newFeature": true
+		"newFeature": true,
+		"nodeModules": false,
+		"autoAudits": false
 	},
 	"miniprogramRoot": "dist/wx/",
 	"compileType": "miniprogram",
 	"appid": "wxf55a6e31920e7294",
-	"projectname": "my-project",
+	"projectname": "mykids",
 	"condition": {
 		"search": {
 			"current": -1,

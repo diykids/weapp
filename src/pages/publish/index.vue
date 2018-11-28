@@ -1,24 +1,33 @@
 <template>
   <div class="pub">
-    <textarea placeholder="点点滴滴……" class="pub-input" v-model="content" auto-focus="true"></textarea>
-    <div class="pub-imgs">
-      <div class="pub-img" v-for="(v,k) in photos" :key="k">
-        <image :src="v" mode="aspectFill" @click="preview(v)"></image>
-        <div class="pub-img-del" @click="delPhoto(k)"><i class="iconfont icon-times"></i></div>
+    <div v-if="isLogin">
+      <textarea placeholder="点点滴滴……" class="pub-input" v-model="content" auto-focus="true"></textarea>
+      <div class="pub-imgs">
+        <div class="pub-img" v-for="(v,k) in photos" :key="k">
+          <image :src="v" mode="aspectFill" @click="preview(v)"></image>
+          <div class="pub-img-del" @click="delPhoto(k)"><i class="iconfont icon-times"></i></div>
+        </div>
+        <div v-if="isShow" class="pub-plus" hover-class="pub-plus-hover" @click="choose"><span>+</span></div>
       </div>
-      <div v-if="isShow" class="pub-plus" hover-class="pub-plus-hover" @click="choose"><span>+</span></div>
+      <div class="pub-submit">
+        <button class="pub-btn-clean" type="default" :loading="loading"
+                :disabled="disabled" bindtap="default" hover-class="hover" @click="clean"> 清空 </button>
+        <button class="pub-btn-ok" type="default" :loading="loading"
+                :disabled="disabled" bindtap="default" hover-class="hover"> 发布 </button>
+      </div>
     </div>
-    <div class="pub-submit">
-      <button class="pub-btn-clean" type="default" :loading="loading"
-              :disabled="disabled" bindtap="default" hover-class="hover" @click="clean"> 清空 </button>
-      <button class="pub-btn-ok" type="default" :loading="loading"
-              :disabled="disabled" bindtap="default" hover-class="hover"> 发布 </button>
+    <div v-if="!isLogin" class="pub-login">
+      <image src="../../static/images/logo.png" class="pub-logo"></image>
+      <login text="登录"></login>
     </div>
   </div>
 </template>
 
 <script>
-export default {
+  import {mapState,mapMutations,mapGetters} from "vuex"
+  import login from "@/components/login"
+
+  export default {
   data () {
     return {
       content:"",
@@ -28,15 +37,20 @@ export default {
       disabled:false,
     }
   },
+  components: {
+    login
+  },
   watch:{
-    content:function(){
-      this.wordTotal = this.content.length
-    },
     photos: function(){
       this.isShow = this.photos.length !== 9
     }
   },
+  computed:{
+    ...mapState(['userInfo']),
+    ...mapGetters(["isLogin"])
+  },
   methods:{
+    ...mapMutations(['setUserInfo']),
     choose(){
       let self = this
       let count = 9 - self.photos.length
@@ -73,6 +87,18 @@ export default {
           }
         })
       }
+    },
+    getUserInfo(){
+      wx.getUserInfo({
+        success: function(res) {
+          console.log(res.userInfo)
+        }
+      })
+    }
+  },
+  onShow(qs){
+    if(this.userInfo.openId){
+      this.isLogin = true
     }
   }
 }
@@ -191,4 +217,15 @@ export default {
   font-weight: bold;
 }
 
+.pub-login{
+  text-align: center;
+  padding: 40rpx;
+}
+
+.pub-logo{
+  width: 200rpx;
+  height:200rpx;
+  border-radius: 100rpx;
+  margin: 100rpx 0;
+}
 </style>

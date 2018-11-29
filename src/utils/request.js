@@ -1,40 +1,63 @@
-import { get } from './maping'
 import Vue from 'vue'
+import co from 'co'
+import { request,uploadFile } from './wxapi'
 
-const baseApi = "http://127.0.0.1:8989/api"
+const baseApi = 'https://api.fifsky.com/api'
 
-export const request = (url, data) => {
-  return new Promise((resolve, reject) => {
-    let accessToken = ""
-    try {
-      accessToken = wx.getStorageSync("access_token")
-    }catch (e) {
 
-    }
+const getAccessToken = function () {
+  let accessToken = ''
+  try {
+    accessToken = wx.getStorageSync('access_token')
+  } catch (e) {}
 
-    let header = {
-      'Access-Token': accessToken,
-    }
+  return accessToken
+}
 
-    wx.request({
+export const createApi = (url, data) => {
+  let header = {
+    'Access-Token': getAccessToken(),
+  }
+
+  return co(function * () {
+    let res = yield request({
       url: baseApi + url,
       data: data,
       method: 'POST',
       header: header,
-      success (res) {
-        if (res.data.code === 200) {
-          resolve(res.data.data)
-        } else {
-          reject(res.data)
-        }
-      },
-      fail (err) {
-        reject(err)
-      }
     })
+
+    if (res.data.code === 200) {
+      return res.data.data
+    } else {
+      throw res.data
+    }
   })
 }
 
-export const createApi = (url, data) => {
-  return request(url, data)
+
+export const createUpload = (file, data) => {
+  let header = {
+    'Access-Token': getAccessToken(),
+    "Content-Type": "multipart/form-data"
+  }
+
+  return co(function * () {
+    let res = yield uploadFile({
+      url: baseApi + "/user/upload",
+      data: data,
+      filePath:file,
+      name:"file",
+      formData:data,
+      header: header,
+    })
+
+    res.data = JSON.parse(res.data)
+
+    if (res.data.code === 200) {
+      return res.data.data
+    } else {
+      throw res.data
+    }
+  })
 }

@@ -6,6 +6,7 @@ const coProcess = (fn, options = {notLoading: false, errHandle: null}) => {
   if(!options.notLoading) {
     wx.showLoading({
       title: '加载中...',
+      mask:true
     })
   }
 

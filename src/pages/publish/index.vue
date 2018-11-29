@@ -13,7 +13,7 @@
         <button class="pub-btn-clean" type="default" :loading="loading"
                 :disabled="disabled" bindtap="default" hover-class="hover" @click="clean"> 清空 </button>
         <button class="pub-btn-ok" type="default" :loading="loading"
-                :disabled="disabled" bindtap="default" hover-class="hover"> 发布 </button>
+                :disabled="disabled" bindtap="default" hover-class="hover" @click="publish"> 发布 </button>
       </div>
     </div>
     <div v-if="!isLogin" class="pub-login">
@@ -24,6 +24,9 @@
 </template>
 
 <script>
+  import {dialog,sync,toTab} from "../../utils"
+  import {uploadApi,momentPostApi} from "../../api"
+
   import {mapState,mapMutations,mapGetters} from "vuex"
   import login from "@/components/login"
 
@@ -32,25 +35,24 @@
     return {
       content:"",
       photos: [],
-      isShow:true,
       loading:false,
-      disabled:false,
     }
   },
   components: {
     login
   },
-  watch:{
-    photos: function(){
-      this.isShow = this.photos.length !== 9
-    }
-  },
   computed:{
     ...mapState(['userInfo']),
-    ...mapGetters(["isLogin"])
+    ...mapGetters(["isLogin"]),
+    isShow() {
+      return this.photos.length !== 9
+    },
+    disabled(){
+      return !this.content.length
+    }
   },
   methods:{
-    ...mapMutations(['setUserInfo']),
+    ...mapMutations(['setUserInfo','setNeedReloadList']),
     choose(){
       let self = this
       let count = 9 - self.photos.length
@@ -73,32 +75,42 @@
     delPhoto(k){
       this.photos.splice(k,1)
     },
+    cleanContent() {
+      this.content = ""
+      this.photos = []
+    },
     clean () {
       let self = this
       if(self.content !== "" || self.photos.length > 0) {
-        wx.showModal({
-          title: '提示',
-          content: '是否清空此次日记？',
-          success (res) {
-            if (res.confirm) {
-              self.content = ""
-              self.photos = []
-            }
+        dialog.confirm("是否清空此次日记？",function (ok) {
+          if(ok){
+            self.cleanContent()
           }
         })
       }
     },
-    getUserInfo(){
-      wx.getUserInfo({
-        success: function(res) {
-          console.log(res.userInfo)
+    publish(){
+      let self = this
+
+      if(self.content === ""){
+        return
+      }
+
+      sync(function* () {
+        let res = yield momentPostApi({content:self.content})
+
+        if(self.photos.length > 0) {
+          let up = []
+          self.photos.forEach(function (v) {
+            up.push(uploadApi(v,{moment_id:res.id}))
+          })
+
+          let ret = yield up
         }
+        self.cleanContent()
+        self.setNeedReloadList(true)
+        toTab("/pages/index/main")
       })
-    }
-  },
-  onShow(qs){
-    if(this.userInfo.openId){
-      this.isLogin = true
     }
   }
 }
@@ -141,6 +153,16 @@
 .pub-submit .pub-btn-ok{
   background: #00B4EE;
   color: #fff;
+}
+
+.pub-submit button.pub-btn-clean[disabled][type=default] {
+  color:rgba(0, 0, 0, 0.3);
+  background-color:#97D2E8;
+}
+
+.pub-submit button.pub-btn-ok[disabled][type=default] {
+  color:rgba(0, 0, 0, 0.3);
+  background-color:#00B4EE;
 }
 
 .pub-submit .pub-btn-clean.hover {

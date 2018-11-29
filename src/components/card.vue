@@ -2,10 +2,10 @@
   <div class="i-card">
     <div class="i-card-header">
       <div class="i-card-header-content">
-        <img class="i-card-header-thumb" :src="item.thumb"/>
-        {{ item.title }}
+        <img class="i-card-header-thumb" :src="item.user.avatar"/>
+        {{ item.user.nickname }}
       </div>
-      <div class="i-card-header-extra">{{ item.extra }}</div>
+      <div class="i-card-header-extra">{{ item.created_at }}</div>
     </div>
     <div class="i-card-body">
       {{ item.content }}
@@ -13,7 +13,7 @@
     <div class="i-card-photo" v-if="item.photos && item.photos.length > 0">
       <div class="i-card-imgs">
         <div class="i-card-img" v-for="(v,k) in item.photos" :key="k">
-          <image :src="v" mode="aspectFill" @click="preview(v)"></image>
+          <image :src="v.url+'!thumb'" mode="aspectFill" @click="preview(v.url)"></image>
         </div>
         <div v-if="isShow" class="pub-plus" hover-class="pub-plus-hover" @click="choose"><span>+</span></div>
       </div>
@@ -38,9 +38,13 @@
       },
       preview(src){
         let self = this
+        let ps = []
+        self.item.photos.forEach(function (v) {
+          ps.push(v.url+"!preview")
+        })
         wx.previewImage({
-          current: src, // 当前显示图片的http链接
-          urls: self.item.photos
+          current: src+"!preview", // 当前显示图片的http链接
+          urls: ps
         })
       },
     }

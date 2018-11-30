@@ -5,7 +5,7 @@
         <img class="i-card-header-thumb" :src="item.user.avatar"/>
         {{ item.user.nickname }}
       </div>
-      <div class="i-card-header-extra">{{ item.created_at }}</div>
+      <div class="i-card-header-extra">{{ humanTime }}</div>
     </div>
     <div class="i-card-body">
       {{ item.content }}
@@ -20,20 +20,65 @@
     </div>
     <div class="i-card-footer">
       <div class="i-card-handle" hover-class="hover"><i class="iconfont icon-forward"></i></div>
-      <div class="i-card-handle" hover-class="hover" @click="toDetail(item.id)"><i class="iconfont icon-liuyan"></i></div>
-      <div class="i-card-handle" hover-class="hover"><i class="iconfont icon-xihuan"></i></div>
+      <div v-if="!hiddenCmtBtn" class="i-card-handle" hover-class="hover" @click="toDetail"><i class="iconfont icon-liuyan"></i><span v-if="item.comment_total > 0">{{item.comment_total}}</span></div>
+      <div class="i-card-handle" hover-class="hover" @click="like"><i class="iconfont" :class="{'icon-xihuanfill':item.is_like,'icon-xihuan':!item.is_like}"></i><span class="i-card-num" v-if="item.like_total > 0">{{item.like_total}}</span></div>
     </div>
   </div>
 </template>
 
 <script>
+  import dayjs from 'dayjs'
+  import isBetween from 'dayjs/plugin/isBetween'
+  import {likeApi} from "../api"
+  import {sync} from "../utils"
+
   export default {
     name: "card",
-    props: ["item"],
+    props:{
+      item:{},
+      hiddenCmtBtn: {
+        default:false
+      }
+    },
+    computed:{
+      humanTime(){
+        dayjs.extend(isBetween)
+        let currTime = dayjs().add(1,"second")
+        let itemTime = dayjs(this.item.created_at)
+
+        if(itemTime.isBetween(currTime.subtract(60,'second'),currTime)){
+          return currTime.diff(itemTime,'second')+'秒前'
+        }else if(itemTime.isBetween( currTime.subtract(60,'minute'),currTime.subtract(1,'minute'))){
+          return currTime.diff(itemTime,'minute')+'分钟前'
+        }else if(itemTime.isBetween(currTime.startOf('day'),currTime.endOf('day'))){
+          return '今天'+itemTime.format("HH:mm")
+        }else if(itemTime.isBetween(currTime.subtract(1,'day').startOf('day'),currTime.subtract(1,'day').endOf('day'))){
+          return '昨天'+itemTime.format("HH:mm")
+        }else if(itemTime.isBetween(currTime.startOf("year"),currTime.subtract(1,'day').endOf('day'))){
+          return itemTime.format("MM月DD日 HH:mm")
+        }else{
+          return itemTime.format("YYYY-MM-DD HH:mm")
+        }
+      }
+    },
     methods:{
-      toDetail(id){
+      like(){
+        let self = this
+        sync(function* () {
+          if(self.item.is_like){
+            self.item.like_total--
+            self.item.is_like = false
+          }else {
+            self.item.like_total++
+            self.item.is_like = true
+          }
+          let ret = yield likeApi({id:self.item.id})
+        })
+      },
+      toDetail(){
+        let self = this
         wx.navigateTo({
-          url: '/pages/detail/main?id='+id
+          url: '/pages/detail/main?id='+self.item.id
         })
       },
       preview(src){
@@ -156,6 +201,20 @@
     border-radius: 10rpx;
     margin-right:10rpx;
     margin-bottom:10rpx;
+  }
+
+  .i-card-handle .iconfont {
+    display: inline;
+    vertical-align: center;
+  }
+
+  .i-card-handle .icon-xihuanfill{
+    color: #e25139
+  }
+
+  .i-card-num{
+    margin-left: 10rpx;
+    font-size: 32rpx;
   }
 
 </style>

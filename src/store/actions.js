@@ -19,7 +19,6 @@ export default {
           if (res.authSetting['scope.userInfo']) {
             let user = yield getUserInfo()
             let ret = yield registerApi(user.userInfo)
-            self.setUserInfo(ret)
             commit("setUserInfo",ret)
           }
         }else{

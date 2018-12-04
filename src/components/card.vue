@@ -31,6 +31,7 @@
   import isBetween from 'dayjs/plugin/isBetween'
   import {likeApi} from "../api"
   import {sync} from "../utils"
+  import login from "@/components/login"
 
   export default {
     name: "card",
@@ -39,6 +40,9 @@
       hiddenCmtBtn: {
         default:false
       }
+    },
+    components: {
+      login
     },
     computed:{
       humanTime(){

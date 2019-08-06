@@ -15,7 +15,7 @@
   "tabBar": {
     "color": "#707070",
     "selectedColor": "#118CE2",
-    "borderStyle": "#dddee1",
+    "borderStyle": "white",
     "list": [
       {
         "selectedIconPath": "static/images/home_active.png",

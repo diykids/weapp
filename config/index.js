@@ -14,7 +14,7 @@ var fileExtConfig = {
         platform: 'wx'
     }
 }
-var fileExt = fileExtConfig[process.env.PLATFORM]
+var fileExt = fileExtConfig[process.env.PLATFORM || 'wx']
 
 module.exports = {
   build: {
